@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS loja.telefone (
   num CHAR(13) NOT NULL,
   cliente_cpf CHAR(11) NOT NULL,
   PRIMARY KEY (num, cliente_cpf),
-  INDEX fk_telefone_cliente1_idx (cliente_cpf ASC),
+  INDEX fk_telefone_cliente1_idx (cliente_cpf ASC) ,
   CONSTRAINT fk_telefone_cliente1
     FOREIGN KEY (cliente_cpf)
     REFERENCES loja.cliente (cpf)
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS loja.endereco (
   complemento VARCHAR(50) NULL,
   cliente_cpf CHAR(11) NOT NULL,
   PRIMARY KEY (id, cliente_cpf),
-  INDEX fk_endereco_cliente1_idx (cliente_cpf ASC),
+  INDEX fk_endereco_cliente1_idx (cliente_cpf ASC) ,
   CONSTRAINT fk_endereco_cliente1
     FOREIGN KEY (cliente_cpf)
     REFERENCES loja.cliente (cpf)
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS loja.produto (
   descricao TEXT NOT NULL,
   marca VARCHAR(45) NULL,
   PRIMARY KEY (id),
-  UNIQUE INDEX idproduto_UNIQUE (id ASC))
+  UNIQUE INDEX idproduto_UNIQUE (id ASC) )
 ENGINE = InnoDB;
 
 
@@ -59,8 +59,8 @@ CREATE TABLE IF NOT EXISTS loja.tipo (
   tipo_idtipo BIGINT NULL,
   produto_idproduto BIGINT NOT NULL,
   PRIMARY KEY (id, produto_idproduto),
-  INDEX fk_tipo_tipo1_idx (tipo_idtipo ASC),
-  INDEX fk_tipo_produto1_idx (produto_idproduto ASC),
+  INDEX fk_tipo_tipo1_idx (tipo_idtipo ASC) ,
+  INDEX fk_tipo_produto1_idx (produto_idproduto ASC) ,
   CONSTRAINT fk_tipo_tipo1
     FOREIGN KEY (tipo_idtipo)
     REFERENCES loja.tipo (id)
@@ -79,8 +79,9 @@ CREATE TABLE IF NOT EXISTS loja.preco (
   preco DECIMAL(13,2) NOT NULL,
   tipo_id BIGINT NOT NULL,
   tipo_produto_idproduto BIGINT NOT NULL,
+  data DATETIME NOT NULL DEFAULT current_timestamp,
   PRIMARY KEY (id, tipo_id, tipo_produto_idproduto),
-  INDEX fk_preco_tipo1_idx (tipo_id ASC, tipo_produto_idproduto ASC),
+  INDEX fk_preco_tipo1_idx (tipo_id ASC, tipo_produto_idproduto ASC) ,
   CONSTRAINT fk_preco_tipo1
     FOREIGN KEY (tipo_id , tipo_produto_idproduto)
     REFERENCES loja.tipo (id , produto_idproduto)
@@ -95,7 +96,7 @@ CREATE TABLE IF NOT EXISTS loja.data_validade (
   lote VARCHAR(15) NULL,
   produto_id BIGINT NOT NULL,
   PRIMARY KEY (id, produto_id),
-  INDEX fk_data_validade_produto1_idx (produto_id ASC),
+  INDEX fk_data_validade_produto1_idx (produto_id ASC) ,
   CONSTRAINT fk_data_validade_produto1
     FOREIGN KEY (produto_id)
     REFERENCES loja.produto (id)
@@ -147,8 +148,8 @@ CREATE TABLE IF NOT EXISTS loja.pedido_tem_produto (
   produto_id BIGINT NOT NULL,
   quantidade DECIMAL(13,2) NOT NULL,
   PRIMARY KEY (pedido_id, produto_id),
-  INDEX fk_pedido_has_produto_pedido1_idx (pedido_id ASC),
-  INDEX fk_pedido_tem_produto_produto1_idx (produto_id ASC),
+  INDEX fk_pedido_has_produto_pedido1_idx (pedido_id ASC) ,
+  INDEX fk_pedido_tem_produto_produto1_idx (produto_id ASC) ,
   CONSTRAINT fk_pedido_has_produto_pedido1
     FOREIGN KEY (pedido_id)
     REFERENCES loja.pedido (id)
@@ -176,9 +177,9 @@ CREATE TABLE IF NOT EXISTS loja.venda (
   data_compra DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   status_id INT NOT NULL,
   PRIMARY KEY (pedido_id, pedido_cliente_cpf, forma_de_pagamento_id, status_id),
-  INDEX fk_venda_forma_de_pagamento1_idx (forma_de_pagamento_id ASC),
-  INDEX fk_venda_status1_idx (status_id ASC),
-  INDEX fk_venda_pedido1_idx (pedido_id ASC, pedido_cliente_cpf ASC),
+  INDEX fk_venda_forma_de_pagamento1_idx (forma_de_pagamento_id ASC) ,
+  INDEX fk_venda_status1_idx (status_id ASC) ,
+  INDEX fk_venda_pedido1_idx (pedido_id ASC, pedido_cliente_cpf ASC) ,
   CONSTRAINT fk_venda_forma_de_pagamento1
     FOREIGN KEY (forma_de_pagamento_id)
     REFERENCES loja.forma_de_pagamento (id)
@@ -204,7 +205,7 @@ CREATE TABLE IF NOT EXISTS loja.entrega (
   tipo_de_entrega VARCHAR(45) NULL,
   status_id INT NOT NULL,
   PRIMARY KEY (id, venda_pedido_id, status_id),
-  INDEX fk_entrega_status1_idx (status_id ASC),
+  INDEX fk_entrega_status1_idx (status_id ASC) ,
   CONSTRAINT fk_entrega_status1
     FOREIGN KEY (status_id)
     REFERENCES loja.status (id)
@@ -217,8 +218,8 @@ CREATE TABLE IF NOT EXISTS loja.fornecedor_tem_forma_de_pagamento (
   fornecedor_cnpj CHAR(14) NOT NULL,
   forma_de_pagamento_id INT NOT NULL,
   PRIMARY KEY (fornecedor_cnpj, forma_de_pagamento_id),
-  INDEX fk_fornecedor_has_forma_de_pagamento_forma_de_pagamento1_idx (forma_de_pagamento_id ASC),
-  INDEX fk_fornecedor_has_forma_de_pagamento_fornecedor1_idx (fornecedor_cnpj ASC),
+  INDEX fk_fornecedor_has_forma_de_pagamento_forma_de_pagamento1_idx (forma_de_pagamento_id ASC) ,
+  INDEX fk_fornecedor_has_forma_de_pagamento_fornecedor1_idx (fornecedor_cnpj ASC) ,
   CONSTRAINT fk_fornecedor_has_forma_de_pagamento_fornecedor1
     FOREIGN KEY (fornecedor_cnpj)
     REFERENCES loja.fornecedor (cnpj)
@@ -239,8 +240,8 @@ CREATE TABLE IF NOT EXISTS loja.fornecedor_fornece_produto (
   gasto DECIMAL(15,2) NOT NULL,
   quantidade DECIMAL(12,2) NOT NULL,
   PRIMARY KEY (fornecedor_cnpj, produto_id),
-  INDEX fk_fornecedor_has_produto_fornecedor1_idx (fornecedor_cnpj ASC),
-  INDEX fk_fornecedor_fornece_produto_produto1_idx (produto_id ASC),
+  INDEX fk_fornecedor_has_produto_fornecedor1_idx (fornecedor_cnpj ASC) ,
+  INDEX fk_fornecedor_fornece_produto_produto1_idx (produto_id ASC) ,
   CONSTRAINT fk_fornecedor_has_produto_fornecedor1
     FOREIGN KEY (fornecedor_cnpj)
     REFERENCES loja.fornecedor (cnpj)
@@ -266,8 +267,8 @@ CREATE TABLE IF NOT EXISTS loja.produto_has_categoria (
   produto_id BIGINT NOT NULL,
   categoria_id INT NOT NULL,
   PRIMARY KEY (produto_id, categoria_id),
-  INDEX fk_produto_has_categoria_categoria1_idx (categoria_id ASC),
-  INDEX fk_produto_has_categoria_produto1_idx (produto_id ASC),
+  INDEX fk_produto_has_categoria_categoria1_idx (categoria_id ASC) ,
+  INDEX fk_produto_has_categoria_produto1_idx (produto_id ASC) ,
   CONSTRAINT fk_produto_has_categoria_produto1
     FOREIGN KEY (produto_id)
     REFERENCES loja.produto (id)
