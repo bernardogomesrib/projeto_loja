@@ -41,14 +41,28 @@ CREATE TABLE IF NOT EXISTS loja.endereco (
 ENGINE = InnoDB;
 
 
+CREATE TABLE IF NOT EXISTS loja.status (
+  id INT NOT NULL AUTO_INCREMENT,
+  status VARCHAR(45) NOT NULL,
+  PRIMARY KEY (id))
+ENGINE = InnoDB;
+
+
 CREATE TABLE IF NOT EXISTS loja.produto (
   id BIGINT NOT NULL AUTO_INCREMENT,
   perecivel TINYINT(1) NOT NULL,
   nome VARCHAR(45) NOT NULL,
   descricao TEXT NOT NULL,
   marca VARCHAR(45) NULL,
-  PRIMARY KEY (id),
-  UNIQUE INDEX idproduto_UNIQUE (id ASC) )
+  status_id INT NOT NULL,
+  PRIMARY KEY (id, status_id),
+  UNIQUE INDEX idproduto_UNIQUE (id ASC) ,
+  INDEX fk_produto_status1_idx (status_id ASC) ,
+  CONSTRAINT fk_produto_status1
+    FOREIGN KEY (status_id)
+    REFERENCES loja.status (id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -160,13 +174,6 @@ CREATE TABLE IF NOT EXISTS loja.pedido_tem_produto (
     REFERENCES loja.produto (id)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
-CREATE TABLE IF NOT EXISTS loja.status (
-  id INT NOT NULL AUTO_INCREMENT,
-  status VARCHAR(45) NOT NULL,
-  PRIMARY KEY (id))
 ENGINE = InnoDB;
 
 
