@@ -2,7 +2,7 @@ CREATE SCHEMA IF NOT EXISTS loja ;
 USE loja ;
 
 CREATE TABLE IF NOT EXISTS loja.cliente (
-  cpf CHAR(11) NOT NULL,
+  cpf CHAR(14) NOT NULL,
   data_nascimento DATE NOT NULL,
   nome VARCHAR(45) NOT NULL,
   sobrenome VARCHAR(45) NOT NULL,
@@ -13,8 +13,8 @@ ENGINE = InnoDB;
 
 
 CREATE TABLE IF NOT EXISTS loja.telefone (
-  num CHAR(13) NOT NULL,
-  cliente_cpf CHAR(11) NOT NULL,
+  num CHAR(18) NOT NULL,
+  cliente_cpf CHAR(14) NOT NULL,
   PRIMARY KEY (num, cliente_cpf),
   INDEX fk_telefone_cliente1_idx (cliente_cpf ASC) ,
   CONSTRAINT fk_telefone_cliente1
@@ -27,10 +27,10 @@ ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS loja.endereco (
   id BIGINT NOT NULL AUTO_INCREMENT,
-  cep CHAR(8) NOT NULL,
+  cep CHAR(9) NOT NULL,
   numero VARCHAR(12) NOT NULL,
   complemento VARCHAR(50) NULL,
-  cliente_cpf CHAR(11) NOT NULL,
+  cliente_cpf CHAR(14) NOT NULL,
   PRIMARY KEY (id, cliente_cpf),
   INDEX fk_endereco_cliente1_idx (cliente_cpf ASC) ,
   CONSTRAINT fk_endereco_cliente1
@@ -147,7 +147,7 @@ ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS loja.pedido (
   id BIGINT NOT NULL AUTO_INCREMENT,
-  cliente_cpf CHAR(11) NOT NULL,
+  cliente_cpf CHAR(14) NOT NULL,
   PRIMARY KEY (id, cliente_cpf),
   CONSTRAINT fk_pedido_cliente1
     FOREIGN KEY (cliente_cpf)
@@ -179,7 +179,7 @@ ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS loja.venda (
   pedido_id BIGINT NOT NULL,
-  pedido_cliente_cpf CHAR(11) NOT NULL,
+  pedido_cliente_cpf CHAR(14) NOT NULL,
   forma_de_pagamento_id INT NOT NULL,
   data_compra DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   status_id INT NOT NULL,
