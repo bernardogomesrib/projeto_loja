@@ -1,4 +1,5 @@
 
+
 CREATE SCHEMA IF NOT EXISTS loja ;
 USE loja ;
 
@@ -93,9 +94,9 @@ CREATE TABLE IF NOT EXISTS loja.preco (
   id BIGINT NOT NULL AUTO_INCREMENT,
   preco DECIMAL(13,2) NOT NULL,
   tipo_id BIGINT NOT NULL,
-  tipo_produto_idproduto BIGINT NOT NULL,
+  tipo_produto_idproduto BIGINT NULL DEFAULT NULL,
   data DATETIME NOT NULL DEFAULT current_timestamp,
-  PRIMARY KEY (id, tipo_id, tipo_produto_idproduto),
+  PRIMARY KEY (id, tipo_id),
   INDEX fk_preco_tipo1_idx (tipo_id ASC, tipo_produto_idproduto ASC),
   CONSTRAINT fk_preco_tipo1
     FOREIGN KEY (tipo_id , tipo_produto_idproduto)
@@ -166,18 +167,17 @@ CREATE TABLE IF NOT EXISTS loja.pedido_tem_produto (
   quantidade DECIMAL(13,2) NOT NULL,
   preco_id BIGINT NOT NULL,
   preco_tipo_id BIGINT NOT NULL,
-  preco_tipo_produto_idproduto BIGINT NOT NULL,
-  PRIMARY KEY (pedido_id, preco_id, preco_tipo_id, preco_tipo_produto_idproduto),
+  PRIMARY KEY (pedido_id, preco_id, preco_tipo_id),
   INDEX fk_pedido_has_produto_pedido1_idx (pedido_id ASC),
-  INDEX fk_pedido_tem_produto_preco1_idx (preco_id ASC, preco_tipo_id ASC, preco_tipo_produto_idproduto ASC),
+  INDEX fk_pedido_tem_produto_preco1_idx (preco_id ASC, preco_tipo_id ASC),
   CONSTRAINT fk_pedido_has_produto_pedido1
     FOREIGN KEY (pedido_id)
     REFERENCES loja.pedido (id)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT fk_pedido_tem_produto_preco1
-    FOREIGN KEY (preco_id , preco_tipo_id , preco_tipo_produto_idproduto)
-    REFERENCES loja.preco (id , tipo_id , tipo_produto_idproduto)
+    FOREIGN KEY (preco_id , preco_tipo_id)
+    REFERENCES loja.preco (id , tipo_id)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -293,3 +293,50 @@ CREATE TABLE IF NOT EXISTS loja.produto_has_categoria (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS loja.fluxo_de_caixa (
+  cod BIGINT NOT NULL AUTO_INCREMENT,
+  data DATE NOT NULL DEFAULT DATE_ADD(CURDATE(), INTERVAL 1 DAY),
+  lucro_dinheiro DECIMAL(10,2) NOT NULL DEFAULT 0,
+  lucro_cartao DECIMAL(10,2) NOT NULL DEFAULT 0,
+  gasto_com_fornecedor DECIMAL(10,2) NOT NULL DEFAULT 0,
+  investimento_interno DECIMAL(10,2) NOT NULL DEFAULT 0,
+  gasto_com_salario DECIMAL(10,2) NOT NULL DEFAULT 0,
+  prolabore DECIMAL(10,2) NOT NULL DEFAULT 0,
+  saldo_do_dia DECIMAL(10,2) NOT NULL DEFAULT 0,
+  PRIMARY KEY (cod),
+  UNIQUE INDEX data_UNIQUE (data ASC))
+ENGINE = InnoDB;
+
+USE loja;
+
+DELIMITER $$
+USE loja$$
+CREATE DEFINER = CURRENT_USER TRIGGER loja.venda_BEFORE_INSERT BEFORE INSERT ON venda FOR EACH ROW
+BEGIN
+  set @lucro = sum((select preco.preco * pedido_tem_produto.quantidade from pedido_tem_produto join preco on pedido_tem_produto.preco_id = preco.id where pedido_tem_produto.pedido_id = new.venda.pedido_id));
+END$$
+
+
+DELIMITER ;
+
+
+
+INSERT INTO status (id, status) VALUES
+(1, 'indisponivel'),
+(2, 'disponível'),
+(3, 'indisponivel'),
+(4, 'disponível');
+
+
+
+INSERT INTO produto (id, perecivel, nome, descricao, marca, status_id) VALUES
+(1, 0, 'produto', 'um produto', 'manufaturado', 2),
+(2, 0, 'produto 2', 'produto 2', 'produ', 1),
+(3, 0, 'produto', 'um produto', 'manufaturado', 2),
+(4, 0, 'produto 2', 'produto 2', 'produ', 1);
+
+INSERT INTO tipo (id, quantidade, descricao, tipo_idtipo, produto_idproduto) VALUES
+(1, 10, 'masculino', NULL, 1),
+(2, 10, 'feminino', NULL, 1);
