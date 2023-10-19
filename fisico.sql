@@ -1,5 +1,3 @@
-
-
 CREATE SCHEMA IF NOT EXISTS loja ;
 USE loja ;
 
@@ -10,7 +8,8 @@ CREATE TABLE IF NOT EXISTS loja.cliente (
   sobrenome VARCHAR(45) NOT NULL,
   email TINYTEXT NOT NULL,
   data_cadastro DATE NOT NULL DEFAULT CURRENT_DATE,
-  PRIMARY KEY (cpf))
+  PRIMARY KEY (cpf),
+  UNIQUE INDEX cpf_UNIQUE (cpf ASC))
 ENGINE = InnoDB;
 
 
@@ -19,6 +18,7 @@ CREATE TABLE IF NOT EXISTS loja.telefone (
   cliente_cpf CHAR(15) NOT NULL,
   PRIMARY KEY (num, cliente_cpf),
   INDEX fk_telefone_cliente1_idx (cliente_cpf ASC),
+  UNIQUE INDEX num_UNIQUE (num ASC),
   CONSTRAINT fk_telefone_cliente1
     FOREIGN KEY (cliente_cpf)
     REFERENCES loja.cliente (cpf)
@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS loja.endereco (
   cliente_cpf CHAR(15) NOT NULL,
   PRIMARY KEY (id, cliente_cpf),
   INDEX fk_endereco_cliente1_idx (cliente_cpf ASC),
+  UNIQUE INDEX id_UNIQUE (id ASC),
   CONSTRAINT fk_endereco_cliente1
     FOREIGN KEY (cliente_cpf)
     REFERENCES loja.cliente (cpf)
@@ -46,7 +47,8 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS loja.status (
   id INT NOT NULL AUTO_INCREMENT,
   status VARCHAR(45) NOT NULL,
-  PRIMARY KEY (id))
+  PRIMARY KEY (id),
+  UNIQUE INDEX id_UNIQUE (id ASC))
 ENGINE = InnoDB;
 
 
@@ -70,7 +72,8 @@ ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS loja.tipo (
   id BIGINT NOT NULL AUTO_INCREMENT,
-  quantidade INT NOT NULL,
+  quantidade DECIMAL(12,2) NOT NULL,
+  preco DECIMAL(10,2) NOT NULL,
   descricao VARCHAR(25) NOT NULL,
   tipo_idtipo BIGINT NULL,
   produto_idproduto BIGINT NOT NULL,
@@ -90,22 +93,6 @@ CREATE TABLE IF NOT EXISTS loja.tipo (
 ENGINE = InnoDB;
 
 
-CREATE TABLE IF NOT EXISTS loja.preco (
-  id BIGINT NOT NULL AUTO_INCREMENT,
-  preco DECIMAL(13,2) NOT NULL,
-  tipo_id BIGINT NOT NULL,
-  tipo_produto_idproduto BIGINT NULL DEFAULT NULL,
-  data DATETIME NOT NULL DEFAULT current_timestamp,
-  PRIMARY KEY (id, tipo_id),
-  INDEX fk_preco_tipo1_idx (tipo_id ASC, tipo_produto_idproduto ASC),
-  CONSTRAINT fk_preco_tipo1
-    FOREIGN KEY (tipo_id , tipo_produto_idproduto)
-    REFERENCES loja.tipo (id , produto_idproduto)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
 CREATE TABLE IF NOT EXISTS loja.data_validade (
   id BIGINT NOT NULL AUTO_INCREMENT,
   data DATE NOT NULL,
@@ -114,6 +101,7 @@ CREATE TABLE IF NOT EXISTS loja.data_validade (
   data_entrada DATETIME NOT NULL DEFAULT current_timestamp,
   PRIMARY KEY (id, produto_id),
   INDEX fk_data_validade_produto1_idx (produto_id ASC),
+  UNIQUE INDEX id_UNIQUE (id ASC),
   CONSTRAINT fk_data_validade_produto1
     FOREIGN KEY (produto_id)
     REFERENCES loja.produto (id)
@@ -136,7 +124,8 @@ CREATE TABLE IF NOT EXISTS loja.fornecedor (
   politica_troca_devolucao VARCHAR(45) NULL,
   site TINYTEXT NULL,
   data_cadastro DATE NULL DEFAULT CURRENT_DATE,
-  PRIMARY KEY (id))
+  PRIMARY KEY (id),
+  UNIQUE INDEX id_UNIQUE (id ASC))
 ENGINE = InnoDB;
 
 
@@ -145,7 +134,8 @@ CREATE TABLE IF NOT EXISTS loja.forma_de_pagamento (
   forma VARCHAR(45) NOT NULL,
   tipo VARCHAR(45) NULL,
   desconto DECIMAL(10,5) NOT NULL,
-  PRIMARY KEY (id))
+  PRIMARY KEY (id),
+  UNIQUE INDEX id_UNIQUE (id ASC))
 ENGINE = InnoDB;
 
 
@@ -154,6 +144,7 @@ CREATE TABLE IF NOT EXISTS loja.pedido (
   cliente_cpf CHAR(15) NOT NULL,
   PRIMARY KEY (id, cliente_cpf),
   INDEX fk_pedido_cliente1_idx (cliente_cpf ASC),
+  UNIQUE INDEX id_UNIQUE (id ASC),
   CONSTRAINT fk_pedido_cliente1
     FOREIGN KEY (cliente_cpf)
     REFERENCES loja.cliente (cpf)
@@ -165,19 +156,19 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS loja.pedido_tem_produto (
   pedido_id BIGINT NOT NULL,
   quantidade DECIMAL(13,2) NOT NULL,
-  preco_id BIGINT NOT NULL,
-  preco_tipo_id BIGINT NOT NULL,
-  PRIMARY KEY (pedido_id, preco_id, preco_tipo_id),
+  preco DECIMAL(10,2) NOT NULL,
+  tipo_id BIGINT NOT NULL,
+  PRIMARY KEY (pedido_id, tipo_id),
   INDEX fk_pedido_has_produto_pedido1_idx (pedido_id ASC),
-  INDEX fk_pedido_tem_produto_preco1_idx (preco_id ASC, preco_tipo_id ASC),
+  INDEX fk_pedido_tem_produto_tipo1_idx (tipo_id ASC),
   CONSTRAINT fk_pedido_has_produto_pedido1
     FOREIGN KEY (pedido_id)
     REFERENCES loja.pedido (id)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT fk_pedido_tem_produto_preco1
-    FOREIGN KEY (preco_id , preco_tipo_id)
-    REFERENCES loja.preco (id , tipo_id)
+  CONSTRAINT fk_pedido_tem_produto_tipo1
+    FOREIGN KEY (tipo_id)
+    REFERENCES loja.tipo (id)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -213,15 +204,22 @@ ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS loja.entrega (
   id BIGINT NOT NULL AUTO_INCREMENT,
-  venda_pedido_id BIGINT NOT NULL,
   numero_rastreio VARCHAR(45) NULL,
   tipo_de_entrega VARCHAR(45) NULL,
   status_id INT NOT NULL,
-  PRIMARY KEY (id, venda_pedido_id, status_id),
+  venda_pedido_id BIGINT NOT NULL,
+  PRIMARY KEY (id, status_id, venda_pedido_id),
   INDEX fk_entrega_status1_idx (status_id ASC),
+  UNIQUE INDEX id_UNIQUE (id ASC),
+  INDEX fk_entrega_venda1_idx (venda_pedido_id ASC),
   CONSTRAINT fk_entrega_status1
     FOREIGN KEY (status_id)
     REFERENCES loja.status (id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT fk_entrega_venda1
+    FOREIGN KEY (venda_pedido_id)
+    REFERENCES loja.venda (pedido_id)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -272,7 +270,8 @@ CREATE TABLE IF NOT EXISTS loja.categoria (
   id INT NOT NULL AUTO_INCREMENT,
   nome VARCHAR(45) NOT NULL,
   descricao TINYTEXT NULL,
-  PRIMARY KEY (id))
+  PRIMARY KEY (id),
+  UNIQUE INDEX id_UNIQUE (id ASC))
 ENGINE = InnoDB;
 
 
@@ -317,9 +316,6 @@ CREATE DEFINER = CURRENT_USER TRIGGER loja.venda_BEFORE_INSERT BEFORE INSERT ON 
 BEGIN
   set @lucro = sum((select preco.preco * pedido_tem_produto.quantidade from pedido_tem_produto join preco on pedido_tem_produto.preco_id = preco.id where pedido_tem_produto.pedido_id = new.venda.pedido_id));
 END$$
-
-
-DELIMITER ;
 
 
 
